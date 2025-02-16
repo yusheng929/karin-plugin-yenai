@@ -23,7 +23,7 @@ export default async function getBotState (selfId: string, isPro: boolean) {
     // const { nickname = '未知', status = 11, apk, version } = bot
 
     // 头像
-    const avatarUrl = await bot.getAvatarUrl(bot.selfId)
+    const avatarUrl = await bot?.getAvatarUrl?.(bot.selfId) || ''
     const avatar = await getAvatarColor(avatarUrl)
     /** 适配器 */
     const platform = bot.adapter.name

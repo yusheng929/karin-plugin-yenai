@@ -85,7 +85,6 @@ export async function getCopyright () {
 
 export async function getData (e: Message) {
   const promiseTaskList = [
-    getFsSize(),
     getCopyright(),
     getSystemResources(),
     getFastFetch(),
