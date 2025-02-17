@@ -1,11 +1,18 @@
 import _ from 'node-karin/lodash'
 import si from 'systeminformation'
 import { getFileSize } from '../index'
+import { monitor } from './monitor'
+import type { DiskData } from './types'
+
+type GetDiskSpeedResult = DiskData & {
+  rIO_sec: string
+  wIO_sec: string
+}
 
 /**
  *  获取硬盘
  */
-export async function getFsSize () {
+export const getFsSize = async () => {
   // 去重
   const fsSize = _.uniqWith(await si.fsSize(),
     (a, b) =>
@@ -31,7 +38,7 @@ export async function getFsSize () {
  * @param use 使用率
  * @returns 颜色
  */
-function setColor (use: number) {
+const setColor = (use: number) => {
   if (use >= 90) {
     return 'var(--high-color)'
   } else if (use >= 70) {
@@ -40,18 +47,22 @@ function setColor (use: number) {
   return 'var(--low-color)'
 }
 
-// /**
-//  * 获取磁盘读写速度
-//  * @returns {object | boolean} 返回一个对象，包含读速度（rx_sec）和写速度（wx_sec），如果无法获取则返回false。
-//  */
-// export function getDiskSpeed() {
-//   let data = Monitor.disksIO
-//   if (!data?.length) return false
-//   data.map(item => {
-//     item.rIO_sec = getFileSize(item.rIO_sec, { showByte: false, showSuffix: false })
-//     item.wIO_sec = getFileSize(item.wIO_sec, { showByte: false, showSuffix: false })
-//     return item
-//   })
+/**
+ * 获取磁盘读写速度
+ * @returns 返回一个对象，包含读速度（rx_sec）和写速度（wx_sec），如果无法获取则返回false。
+ */
+export const getDiskSpeed = () => {
+  const data = monitor.disksIO
+  if (!data?.length) return false
 
-//   return data
-// }
+  const result: GetDiskSpeedResult[] = []
+
+  data.forEach(item => {
+    result.push(Object.assign(item, {
+      rIO_sec: getFileSize(item.rIO_sec, { showByte: false, showSuffix: false }),
+      wIO_sec: getFileSize(item.wIO_sec, { showByte: false, showSuffix: false })
+    }))
+  })
+
+  return data
+}

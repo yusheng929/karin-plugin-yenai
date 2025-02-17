@@ -1,11 +1,20 @@
-import _ from 'node-karin/lodash'
+import lodash from 'node-karin/lodash'
 import moment from 'node-karin/moment'
 import systeminformation from 'systeminformation'
-import { getFsSize } from './system/fsSize'
-import { logger } from 'node-karin'
-import getSystemResources from './system'
-import getBotState from './bot'
-import type { Message } from 'node-karin'
+
+import { plugin } from './dir'
+import { monitor } from './system/monitor'
+import { getBotState } from '@/utils/style/bot'
+import { getRedisInfo } from '@/utils/style/redis'
+import { getStyle } from '@/utils/style/backdrop'
+import { getNetwork } from '@/utils/system/network'
+import { getSystemResources } from '@/utils/system'
+import { getFastFetch } from '@/utils/system/fastfetch'
+import { getProcessLoad } from '@/utils/system/processLoad'
+import { getDiskSpeed, getFsSize } from '@/utils/system/fsSize'
+
+import { common, getPlugins, type Message } from 'node-karin'
+import { defaultConfig } from './config/default'
 
 let osInfo: systeminformation.Systeminformation.OsData
 systeminformation.osInfo()
@@ -13,23 +22,11 @@ systeminformation.osInfo()
     osInfo = res
   })
 
-const timePromiseExecution = (
-  promiseFn: Promise<any>,
-  name: string
-) => {
-  const debugMessages = []
-  const startTime = Date.now()
-  return promiseFn.then((result) => {
-    const endTime = Date.now()
-    const duration = endTime - startTime
-    const ter = logger.green(duration + ' ms')
-    logger.debug(`[State] 获取 ${logger.magenta(name)} 用时: ${ter}`)
-    debugMessages.push(`${name}: ${duration} ms`)
-    return result
-  })
-}
-
-export default function getOtherInfo () {
+/**
+ * 获取其他信息
+ * @returns 其他信息
+ */
+export const getOtherInfo = async () => {
   const otherInfo = []
   // 其他信息
   otherInfo.push({
@@ -39,62 +36,42 @@ export default function getOtherInfo () {
   // 插件数量
   otherInfo.push({
     first: '插件',
-    tail: 0
+    tail: (await getPlugins('all')).length
   })
   otherInfo.push({
     first: '系统运行',
-    tail: '0时1分1秒'
+    tail: common.uptime()
   })
 
-  return _.compact(otherInfo)
+  return lodash.compact(otherInfo)
 }
 
-const getFastFetch = async () => {
-  return ''
-}
-
-const getNetwork = async () => {
-  return false
-}
-
-const getStyle = async () => {
-  return ''
-}
-
-const getRedisInfo = async () => {
-  return false
-}
-
-const getProcessLoad = async () => {
-  return false
-}
-
-export async function getCopyright () {
+/**
+ * 获取版权信息
+ * @returns 版权信息
+ */
+export const getCopyright = async (): Promise<string> => {
   const { node, v8, git, redis } = await systeminformation.versions('node,v8,git,redis')
-  let v = `Created By karin<span class="version">${process.env.KARIN_VERSION}</span> & Yenai-Plugin<span class="version">v0.0.1</span>`
-  v += '<br>'
-  v += `Node <span class="version">v${node}</span> & V8 <span class="version">v${v8}</span>`
-  if (git) {
-    v += ` & Git <span class="version">v${git}</span>`
-  }
-  if (redis) {
-    v += ` & Redis <span class="version">v${redis}</span>`
-  }
-  return v
+  const version = [
+    `Created By karin<span class="version">${process.env.KARIN_VERSION}</span> `,
+    `& ${plugin.name}<span class="version">v${plugin.version}</span>`,
+    '<br>',
+    `Node <span class="version">v${node}</span> & V8 <span class="version">v${v8}</span>`,
+    git && ` & Git <span class="version">v${git}</span>`,
+    redis && ` & Redis <span class="version">v${redis}</span>`,
+    '<br>',
+    '© Yenai-Plugin'
+  ].filter(Boolean).join('')
+  return version
 }
 
-export async function getData (e: Message) {
-  const promiseTaskList = [
-    getCopyright(),
-    getSystemResources(),
-    getFastFetch(),
-    getFsSize(),
-    getNetwork(),
-    getBotState(e.selfId, e.msg.includes('pro')),
-    getStyle(),
-    getRedisInfo(),
-    getProcessLoad()
-  ]
+/**
+ * @description 获取椰奶状态渲染数据
+ * @param e 消息对象
+ * @returns 数据
+ */
+export const getData = async (e: Message) => {
+  const isPro = e.msg.includes('pro')
 
   const [
     copyright,
@@ -105,23 +82,35 @@ export async function getData (e: Message) {
     BotStatusList,
     style,
     redisInfo,
-    processLoad
-  ] = await timePromiseExecution(Promise.all(promiseTaskList), 'all')
+    processLoad,
+    otherInfo
+  ] = await Promise.all([
+    getCopyright(),
+    getSystemResources(),
+    getFastFetch(isPro),
+    getFsSize(),
+    getNetwork(),
+    getBotState(e.selfId, isPro),
+    getStyle(),
+    getRedisInfo(isPro),
+    getProcessLoad(isPro),
+    getOtherInfo()
+  ])
 
   return {
     // 数据
     BotStatusList,
     redis: redisInfo,
-    chartData: '',
-    visualData: _.compact(visualData),
-    otherInfo: getOtherInfo(),
+    chartData: getChartData(isPro, true),
+    visualData: lodash.compact(visualData),
+    otherInfo,
     disks: {
-      disksIo: false,
+      disksIo: getDiskSpeed(),
       disksSize: HardDisk
     },
     network: {
       speed: getNetwork(),
-      psTest: _.isEmpty(psTest) ? undefined : psTest
+      psTest: lodash.isEmpty(psTest) ? undefined : psTest
     },
     FastFetch,
     processLoad,
@@ -130,9 +119,35 @@ export async function getData (e: Message) {
     // 版权
     copyright,
     // 配置
-    Config: '',
-    rawConfig: {},
+    Config: JSON.stringify(defaultConfig),
+    rawConfig: defaultConfig,
     time: moment().format('YYYY-MM-DD HH:mm:ss'),
-    isPro: false
+    isPro
   }
+}
+
+/**
+ * 获取图表数据
+ * @param isPro 是否为pro
+ * @param cfg 配置
+ * @returns 图表数据
+ */
+const getChartData = (isPro: boolean, cfg: boolean | 'pro') => {
+  if (cfg !== true && !(cfg === 'pro' && isPro)) return false
+  const check = checkIfEmpty(monitor.chartData.network)
+  console.log(monitor.chartData)
+  return check ? false : JSON.stringify(monitor.chartData)
+}
+
+/**
+ * 检查数据是否为空
+ * @param data 数据
+ * @param omits 忽略的属性
+ * @returns 是否为空
+ */
+const checkIfEmpty = <T extends Record<string, unknown>> (data: T, omits: string[] = []): boolean => {
+  const filteredData = lodash.omit(data, omits)
+  return lodash.every(filteredData, (value): boolean =>
+    lodash.isPlainObject(value) ? checkIfEmpty(value as T) : lodash.isEmpty(value)
+  )
 }

@@ -1,6 +1,5 @@
-import { dirPath } from './dir'
-import { getAllBotID, getBot } from 'node-karin'
-import moment from 'node-karin/moment'
+import { plugin } from '../dir'
+import { formatTime, getAllBotID, getBot } from 'node-karin'
 
 /**
  * 获取bot状态
@@ -8,9 +7,9 @@ import moment from 'node-karin/moment'
  * @param isPro 是否为pro
  * @returns
  */
-export default async function getBotState (selfId: string, isPro: boolean) {
+export const getBotState = async (selfId: string, isPro: boolean) => {
   /** bot的列表 */
-  const list = isPro ? [selfId] : getAllBotID()
+  const list = isPro ? getAllBotID() : [selfId]
 
   const dataPromises = list.map(async (i) => {
     const bot = getBot(i)
@@ -32,7 +31,7 @@ export default async function getBotState (selfId: string, isPro: boolean) {
     /** 好友 */
     const countContacts = getCountContacts()
     /** 运行时间 */
-    const botRunTime = moment(Date.now() / 1000 - bot.adapter.connectTime, 'dd天hh:mm:ss', true)
+    const botRunTime = formatTime(Date.now() - bot.adapter.connectTime)
     /** 版本 */
     const botVersion = bot.adapter.version
 
@@ -52,7 +51,7 @@ export default async function getBotState (selfId: string, isPro: boolean) {
 }
 
 async function getAvatarColor (url: string) {
-  const defaultAvatar = `${dirPath}/resources/state/img/default_avatar.jpg`
+  const defaultAvatar = `${plugin.dir}/resources/state/img/default_avatar.jpg`
   try {
     if (url === 'default') {
       url = defaultAvatar
@@ -70,18 +69,18 @@ async function getAvatarColor (url: string) {
 async function getMessageCount () {
   return {
     /** 发送消息 */
-    sent: 0,
+    sent: 1,
     /** 接收消息 */
-    recv: 0,
+    recv: 1,
     /** 截图 */
-    screenshot: 0
+    screenshot: 1
   }
 }
 
 function getCountContacts () {
-  const friend = 0
-  const group = 0
-  const groupMember = 0
+  const friend = 1
+  const group = 1
+  const groupMember = 1
   return {
     friend,
     group,

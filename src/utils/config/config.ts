@@ -1,4 +1,5 @@
-import { dirPath, basename } from '@/utils'
+export { pkg } from '@/utils/dir'
+import { plugin } from '@/utils/dir'
 import {
   watch,
   logger,
@@ -8,10 +9,10 @@ import {
   requireFileSync,
 } from 'node-karin'
 
-const dir = `${basePath}/${basename}`
+const dir = `${basePath}/${plugin.name}`
 const dirConfig = `${dir}/config`
 
-const defDir = `${dirPath}/config`
+const defDir = `${plugin.dir}/config`
 const defConfig = `${defDir}/config`
 
 /**
@@ -27,11 +28,6 @@ export const config = () => {
   const def = requireFileSync(`${defConfig}/config.yaml`)
   return { ...def, ...cfg }
 }
-
-/**
- * @description package.json
- */
-export const pkg = () => requireFileSync(`${dirPath}/package.json`)
 
 /**
  * @description 监听配置文件

@@ -12,7 +12,7 @@ const SYSTEM_RESOURCE_MAP = {
   Node: getNode
 }
 
-export default async function getSystemResources () {
+export const getSystemResources = async () => {
   const systemResources = ['CPU', 'RAM', 'SWAP', 'GPU'] as const
   const systemResourcesList = await Promise.all(systemResources.map(i => SYSTEM_RESOURCE_MAP[i]()))
   const visualDataPromise = systemResourcesList.map(i => {
