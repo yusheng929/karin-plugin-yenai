@@ -238,7 +238,6 @@ export const getProcessLoad = async (isPro: boolean): Promise<false | {
       const childSuffix = childCount > 0 ? `(${childCount})` : ''
       const displayName = (showCmd ? command : name) + childSuffix
 
-      console.log('cpu:', cpu)
       processList.push({
         name: displayName,
         pid: String(pid),

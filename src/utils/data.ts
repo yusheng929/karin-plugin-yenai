@@ -135,7 +135,6 @@ export const getData = async (e: Message) => {
 const getChartData = (isPro: boolean, cfg: boolean | 'pro') => {
   if (cfg !== true && !(cfg === 'pro' && isPro)) return false
   const check = checkIfEmpty(monitor.chartData.network)
-  console.log(monitor.chartData)
   return check ? false : JSON.stringify(monitor.chartData)
 }
 
