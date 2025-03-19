@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/yusheng929/karin-plugin-yenai/compare/v1.1.0...v1.1.1) (2025-03-19)
+
+
+### Bug Fixes
+
+* 修复Bot运行时间错误的问题 ([7f7597b](https://github.com/yusheng929/karin-plugin-yenai/commit/7f7597ba25144b0c93a4878c10930545fd3409d7))
+
 ## [1.1.0](https://github.com/yusheng929/karin-plugin-yenai/compare/v1.0.1...v1.1.0) (2025-02-22)
 
 
