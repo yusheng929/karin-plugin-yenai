@@ -31,7 +31,7 @@ export const getBotState = async (selfId: string, isPro: boolean) => {
     /** 好友 */
     const countContacts = getCountContacts()
     /** 运行时间 */
-    const botRunTime = formatTime(Date.now() - bot.adapter.connectTime)
+    const botRunTime = formatTime(bot.adapter.connectTime)
     /** 版本 */
     const botVersion = bot.adapter.version
 
