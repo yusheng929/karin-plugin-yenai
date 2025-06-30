@@ -19,7 +19,8 @@
     "rootDir": "./src",
     "declaration": true,
     "noImplicitAny": true,
-    "strict": true
+    "strict": true,
+    "noEmit": true
   },
   "tsc-alias": {
     "resolveFullPaths": true,

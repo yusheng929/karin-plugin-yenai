@@ -1,5 +1,6 @@
 import { plugin } from '../dir'
-import { formatTime, getAllBotID, getBot } from 'node-karin'
+import karin, { formatTime, getAllBotID, getBot } from 'node-karin'
+import { getMonthStat } from '@karinjs/plugin-basic'
 
 /**
  * 获取bot状态
@@ -28,8 +29,8 @@ export const getBotState = async (selfId: string, isPro: boolean) => {
     const platform = bot.adapter.name
     /** 消息 */
     const messageCount = await getMessageCount()
-    /** 好友 */
-    const countContacts = getCountContacts()
+    /** 好友、群数量 */
+    const countContacts = await getCountContacts(selfId)
     /** 运行时间 */
     const botRunTime = formatTime(bot.adapter.connectTime)
     /** 版本 */
@@ -66,21 +67,47 @@ async function getAvatarColor (url: string) {
     }
   }
 }
-async function getMessageCount () {
+
+/** 获取消息数量 */
+const getMessageCount = async () => {
+  const { recv, send } = await getMonthStat()
   return {
     /** 发送消息 */
-    sent: 1,
+    sent: send,
     /** 接收消息 */
-    recv: 1,
+    recv,
     /** 截图 */
-    screenshot: 1
+    screenshot: 0
   }
 }
 
-function getCountContacts () {
-  const friend = 1
-  const group = 1
-  const groupMember = 1
+/**
+ * 获取好友、群、群成员数量
+ * @param selfId Bot_ID
+ */
+const getCountContacts = async (selfId: string) => {
+  const bot = karin.getBot(selfId)
+  if (!bot) {
+    return {
+      friend: 0,
+      group: 0,
+      groupMember: 0
+    }
+  }
+
+  const [friendList, groupList] = await Promise.all([
+    bot.getFriendList(),
+    bot.getGroupList()
+  ])
+
+  const friend = friendList.length
+  const group = groupList.length
+  const groupMember = groupList.map(v => v.memberCount).reduce((acc, curr) => {
+    if (!acc) return curr
+    if (!curr) return acc
+    return acc + curr
+  }, 0)
+
   return {
     friend,
     group,

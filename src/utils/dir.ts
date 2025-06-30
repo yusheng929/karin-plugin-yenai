@@ -1,6 +1,7 @@
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import { fileURLToPath } from 'url'
-import { requireFileSync } from 'node-karin'
+import { karinPathBase, requireFileSync } from 'node-karin'
 
 /** 当前文件的绝对路径 */
 const filePath = fileURLToPath(import.meta.url).replace(/\\/g, '/')
@@ -13,6 +14,8 @@ export const plugin: {
   version: string
   /** 插件包绝对路径 */
   dir: string
+  /** 获取自定义背景图文件夹路径 */
+  customBackgroundImageDir: string
 } = {
   get name () {
     return pkg().name
@@ -20,10 +23,17 @@ export const plugin: {
   get version () {
     return pkg().version
   },
-  dir: path.resolve(filePath, '../../../')
+  dir: path.resolve(filePath, '../../../'),
+  get customBackgroundImageDir () {
+    return path.join(karinPathBase, plugin.name, 'resources/state')
+  }
 }
 
 /**
  * @description package.json
  */
 export const pkg = () => requireFileSync(`${plugin.dir}/package.json`)
+
+if (!fs.existsSync(plugin.customBackgroundImageDir)) {
+  fs.mkdirSync(plugin.customBackgroundImageDir, { recursive: true })
+}

@@ -2,31 +2,39 @@ import fs from 'node:fs'
 import lodash from 'node-karin/lodash'
 import { plugin } from '../dir'
 import { join } from '../common/common'
+import { config } from '../config/config'
 
 /**
  * 资源缓存目录
  */
 
 export const getStyle = async () => {
-  const backdrop = 'https://t.alcy.cc/mp'
-  const backdropDefault = 'random'
+  const cfg = config()
+  if (cfg.style.backdrop === 'false') {
+    return {
+      backdrop: getDefaultBackdrop(true)
+    }
+  }
+
   return {
-    backdrop
+    backdrop: cfg.style.backdrop
   }
 }
 
 /**
  * 获取默认背景图
- * @param backdropDefault 默认背景图
+ * @param fileName 默认背景图
  * @returns 默认背景图
  */
-const getDefaultBackdrop = (backdropDefault: string) => {
-  const dir = join(plugin.dir, 'resources/state/img/bg')
-  if (backdropDefault === 'random') {
-    backdropDefault = lodash.sample(fs.readdirSync(dir)) || 'default_bg.jpg'
+const getDefaultBackdrop = (isRandom?: boolean) => {
+  if (isRandom) {
+    const dir = plugin.customBackgroundImageDir
+    const img = lodash.sample(fs.readdirSync(dir))
+    if (img) return img
   }
-  return {
-    path: join(dir, backdropDefault),
-    fileName: backdropDefault
-  }
+
+  const imgDir = join(plugin.dir, 'resources/state/img/bg')
+  const img = join(imgDir, 'default_bg.jpg')
+
+  return img
 }

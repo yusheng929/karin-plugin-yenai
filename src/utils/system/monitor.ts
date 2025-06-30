@@ -9,9 +9,9 @@ import type { ObserveData, ChartData, DiskData, NetworkData } from './types'
 /** 图表数据key */
 const CHART_DATA_KEY = 'karin:yenai:state:chartData'
 /** 默认获取数据的间隔时间 */
-const DEFAULT_INTERVAL = 60 * 1000
+// const DEFAULT_INTERVAL = 60 * 1000
 /** 默认存储的数据数量 */
-const DEFAULT_SAVE_DATA_NUMBER = 60
+// const DEFAULT_SAVE_DATA_NUMBER = 60
 
 const config = {
   /** 是否开启监控任务 */
@@ -215,8 +215,8 @@ const handleData = (data: ObserveData) => {
 
   if (networkStats.length > 0 && lodash.isNumber(networkStats[0]?.tx_sec) && lodash.isNumber(networkStats[0]?.rx_sec)) {
     monitor.network = networkStats
-    addDataIfNumber(monitor.chartData.network.upload, now, networkStats[0].tx_sec)
-    addDataIfNumber(monitor.chartData.network.download, now, networkStats[0].rx_sec)
+    addDataIfNumber(monitor.chartData.network.upload, now, networkStats[0].tx_sec!)
+    addDataIfNumber(monitor.chartData.network.download, now, networkStats[0].rx_sec!)
   }
 
   setRedisChartData()
