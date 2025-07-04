@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/yusheng929/karin-plugin-yenai/compare/v1.1.3...v1.1.4) (2025-07-04)
+
+
+### Bug Fixes
+
+* lock ([99829a7](https://github.com/yusheng929/karin-plugin-yenai/commit/99829a7107883d18d3234d9755ef88d34f9c2c23))
+
 ## [1.1.3](https://github.com/yusheng929/karin-plugin-yenai/compare/v1.1.2...v1.1.3) (2025-07-04)
 
 
