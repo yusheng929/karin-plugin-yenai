@@ -23,10 +23,16 @@ export const plugin: {
   get version () {
     return pkg().version
   },
-  dir: path.resolve(filePath, '../../../'),
+  get dir () {
+    let dirPath = path.resolve(filePath, '../../../')
+    if (!fs.existsSync(path.join(dirPath, 'package.json'))) {
+      dirPath = path.resolve(filePath, '../../')
+    }
+    return dirPath
+  },
   get customBackgroundImageDir () {
     return path.join(karinPathBase, plugin.name, 'resources/state')
-  }
+  },
 }
 
 /**
