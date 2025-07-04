@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.8](https://github.com/yusheng929/karin-plugin-yenai/compare/v1.1.7...v1.1.8) (2025-07-04)
+
+
+### Bug Fixes
+
+* 删除不再使用的 CSS 和 HTML 文件，优化目录获取逻辑 ([74dd5f3](https://github.com/yusheng929/karin-plugin-yenai/commit/74dd5f3a76c749fd52a3ec2ab2f83e7671ea0ac5))
+
 ## [1.1.7](https://github.com/yusheng929/karin-plugin-yenai/compare/v1.1.6...v1.1.7) (2025-07-04)
 
 
